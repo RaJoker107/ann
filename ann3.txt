@@ -1,0 +1,80 @@
+import numpy as np
+
+# Sigmoid activation function and its derivative
+def sigmoid(x):
+    return 1 / (1 + np.exp(-x))
+
+def sigmoid_derivative(x):
+    return x * (1 - x)
+
+# Initialize neural network parameters
+input_size = 2
+hidden_size = 3
+output_size = 1
+
+# Set learning rate
+learning_rate = 0.1
+
+# Initialize weights with random values
+weights_input_hidden = np.random.uniform(size=(input_size, hidden_size), low=-1, high=1)
+weights_hidden_output = np.random.uniform(size=(hidden_size, output_size), low=-1, high=1)
+
+# Input data
+inputs = np.array([[0, 0],
+                    [0, 1],
+                    [1, 0],
+                    [1, 1]])
+
+# Output data
+outputs = np.array([[0],
+                     [1],
+                     [1],
+                     [0]])
+
+# Training the neural network
+epochs = 10000
+
+for epoch in range(epochs):
+    # Forward pass
+    hidden_layer_input = np.dot(inputs, weights_input_hidden)
+    hidden_layer_output = sigmoid(hidden_layer_input)
+
+    output_layer_input = np.dot(hidden_layer_output, weights_hidden_output)
+    predicted_output = sigmoid(output_layer_input)
+
+    # Calculate error
+    error = outputs - predicted_output
+
+    # Calculate mean squared error (MSE) loss
+    loss = np.mean(error**2)
+
+    # Backpropagation
+    output_error_gradient = error * sigmoid_derivative(predicted_output)
+    hidden_layer_error = output_error_gradient.dot(weights_hidden_output.T)
+    hidden_layer_gradient = hidden_layer_error * sigmoid_derivative(hidden_layer_output)
+
+    # Update weights
+    weights_hidden_output += hidden_layer_output.T.dot(output_error_gradient) * learning_rate
+    weights_input_hidden += inputs.T.dot(hidden_layer_gradient) * learning_rate
+
+    # Print epoch and loss information
+    if epoch % 1000 == 0:
+        print(f"Epoch {epoch}, Loss: {loss}")
+
+# Testing the trained neural network
+test_inputs = np.array([[0, 0],
+                         [0, 1],
+                         [1, 0],
+                         [1, 1]])
+
+# Forward pass for testing
+hidden_layer_test_input = np.dot(test_inputs, weights_input_hidden)
+hidden_layer_test_output = sigmoid(hidden_layer_test_input)
+
+output_layer_test_input = np.dot(hidden_layer_test_output, weights_hidden_output)
+final_output = sigmoid(output_layer_test_input)
+
+# Display the final predictions
+print("Final predictions after training:")
+for i in range(len(final_output)):
+    print(f"Input: {test_inputs[i]}, Predicted Output: {final_output[i]}")
